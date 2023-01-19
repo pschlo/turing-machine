@@ -1,0 +1,69 @@
+import java.util.*;
+
+
+public class TuringMachine {
+    ArrayList<Character> rightTape = new ArrayList<>();
+    ArrayList<Character> leftTape = new ArrayList<>();
+    Map<DeltaIn,DeltaOut> delta;
+    int state;
+    int endState;
+    int pos = 0;
+    
+    public TuringMachine(int startState, int endState, Map<DeltaIn,DeltaOut> delta, String word) {
+        this.state = startState;
+        this.endState = endState;
+        this.delta = delta;
+        leftTape.add('B');
+        for (char c : word.toCharArray())
+            rightTape.add(c);
+        rightTape.add('B');
+    }
+
+    public void run() {
+        DeltaOut deltaRes;
+        while (state != endState) {
+            deltaRes = delta.get(new DeltaIn(state, read()));
+            write(deltaRes.b);
+            state = deltaRes.q;
+            move(deltaRes.d);
+            System.out.println(getConfig());
+        }
+    }
+
+    public char read() {
+        if (pos >= 0) {
+            return rightTape.get(pos);
+        }
+        return leftTape.get(-pos+1);
+    }
+
+    public void write(char c) {
+        if (pos >= 0) {
+            rightTape.set(pos, c);
+        } else {
+            leftTape.set(-pos+1, c);
+        }
+    }
+
+    public void move(char dir) {
+        if (dir == 'R') {
+            pos++;
+        }
+        else {
+            pos--;
+        }
+    }
+
+    public String getConfig(){
+        String config = "";
+        for (int i = -leftTape.size()+1; i < rightTape.size()-1; i++) {
+            if (i == pos)
+                config += "[" + state + "]";
+            if (pos >= 0) {
+                config += rightTape.get(i);
+            }
+            else config += leftTape.get(-pos+1);
+        }
+        return config;
+    }
+}
